@@ -1,0 +1,127 @@
+import javax.swing.*;
+import java.awt.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class PasswordStrengthTester {
+
+    public static final String ANSI_BLUE_BACKGROUND = "\u001B[44m";
+    public static final String ANSI_BLACK_WHITE_TEXT = "\u001B[30;47m";
+    public static final String ANSI_RESET = "\u001B[0m";
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> createAndShowGUI());
+    }
+
+    private static void createAndShowGUI() {
+        JFrame frame = new JFrame("Password Strength Tester");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        // Adjusted the layout manager to FlowLayout with center alignment
+
+        // Add a JPasswordField for password entry
+        JPasswordField passwordField = new JPasswordField();
+        passwordField.setBackground(new Color(173, 216, 230)); // Light blue background
+        passwordField.setForeground(Color.BLACK); // Black text color
+        passwordField.setPreferredSize(new Dimension(200, 30));
+
+        // Add a checkbox to show/hide password
+        JCheckBox showPasswordCheckbox = new JCheckBox("Show Password");
+        showPasswordCheckbox.addActionListener(e -> {
+            if (showPasswordCheckbox.isSelected()) {
+                passwordField.setEchoChar((char) 0); // Show password
+            } else {
+                passwordField.setEchoChar('*'); // Hide password
+            }
+        });
+
+        JButton checkButton = new JButton("Check Strength");
+
+        checkButton.addActionListener(e -> {
+            char[] passwordChars = passwordField.getPassword();
+            String password = new String(passwordChars); // Get password from JPasswordField
+
+            int strength = checkPasswordStrength(password);
+
+            JOptionPane.showMessageDialog(frame,
+                    "Password Strength: " + getStrengthLabel(strength),
+                    "Password Strength",
+                    JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        panel.add(passwordField);
+        panel.add(showPasswordCheckbox);
+        panel.add(checkButton);
+
+        frame.getContentPane().add(BorderLayout.CENTER, panel);
+        frame.setSize(300, 150);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    private static int checkPasswordStrength(String password) {
+        int strength = 0;
+
+        // Check length
+        if (password.length() >= 8) {
+            strength++;
+        }
+
+        // Check for uppercase letters
+        if (containsUppercase(password)) {
+            strength++;
+        }
+
+        // Check for lowercase letters
+        if (containsLowercase(password)) {
+            strength++;
+        }
+
+        // Check for numbers
+        if (containsNumber(password)) {
+            strength++;
+        }
+
+        // Check for special characters
+        if (containsSpecialCharacter(password)) {
+            strength++;
+        }
+
+        return strength;
+    }
+
+    private static boolean containsUppercase(String password) {
+        return !password.equals(password.toLowerCase());
+    }
+
+    private static boolean containsLowercase(String password) {
+        return !password.equals(password.toUpperCase());
+    }
+
+    private static boolean containsNumber(String password) {
+        return password.matches(".*\\d.*");
+    }
+
+    private static boolean containsSpecialCharacter(String password) {
+        Pattern pattern = Pattern.compile("[^a-zA-Z0-9]");
+        Matcher matcher = pattern.matcher(password);
+        return matcher.find();
+    }
+
+    private static String getStrengthLabel(int strength) {
+        switch (strength) {
+            case 0:
+            case 1:
+                return "Weak";
+            case 2:
+                return "Moderate";
+            case 3:
+                return "Strong";
+            case 4:
+                return "Very Strong";
+            default:
+                return "Invalid Strength";
+        }
+    }
+}
